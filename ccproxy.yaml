@@ -1,0 +1,29 @@
+ccproxy:
+  debug: true
+  #handler: "ccproxy.handler:CCProxyHandler"
+
+  # OAuth token sources - shell commands to retrieve tokens for each provider
+  oat_sources:
+    # Option 1: Using jq (cleanest, requires: brew install jq)
+    # anthropic: "security find-generic-password -s \"Claude Code-credentials\" -w | jq -r '.claudeAiOauth.accessToken'"
+
+    # Option 2: Using sed (built-in, no dependencies)
+    anthropic: "security find-generic-password -s \"Claude Code-credentials\" -w | sed -n 's/.*\"accessToken\":\"\\([^\"]*\\)\".*/\\1/p'"
+
+  hooks:
+    - ccproxy.hooks.rule_evaluator # evaluates rules against request
+    - ccproxy.hooks.model_router # routes to appropriate model (coupled with rule_evaluator)
+    - ccproxy.hooks.capture_headers # captures all HTTP headers with sensitive value redaction
+    - ccproxy.hooks.forward_oauth # forwards oauth token to provider (place after routing logic)
+
+  # uses the original model that Claude Code requested when no routing rule matches.
+  # NOTE: model deployments in config.yaml are still required
+  #default_model_passthrough: true
+  rules: []
+
+litellm:
+  host: 127.0.0.1
+  port: 4000
+  num_workers: 4
+  debug: true
+  detailed_debug: true
