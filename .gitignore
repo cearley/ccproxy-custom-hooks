@@ -45,6 +45,9 @@ htmlcov/
 # Type checking
 .mypy_cache/
 
+# Ruff cache
+.ruff_cache/
+
 # Project-specific archives
 config.moved.yaml
 *.bak

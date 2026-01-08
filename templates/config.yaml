@@ -3,25 +3,20 @@
 
 model_list:
   # Aliases for commonly used Claude Code models
-  - model_name: default # Best for everyday tasks
+  - model_name: default # Sonnet - Best for everyday tasks
     litellm_params:
       model: claude-sonnet-4-5-20250929
-      extra_headers:
-        anthropic-beta: oauth-2025-04-20
 
-  - model_name: opus # (think) - Most capable for complex work
+  - model_name: think # Opus - Most capable for complex work
     litellm_params:
       model: claude-opus-4-5-20251101
-      extra_headers:
-        anthropic-beta: oauth-2025-04-20
 
-  - model_name: haiku # (background) - Fast and cost-effective
+  - model_name: background # Haiku - Fast and cost-effective
     litellm_params:
       model: claude-haiku-4-5-20251001
-      extra_headers:
-        anthropic-beta: oauth-2025-04-20
 
   # Claude models - Using OAuth via forward_oauth hook
+  # See https://platform.claude.com/docs/en/about-claude/models/overview#choosing-a-model
   - model_name: claude-sonnet-4-5-20250929
     litellm_params:
       model: anthropic/claude-sonnet-4-5-20250929
@@ -45,27 +40,33 @@ model_list:
     litellm_params:
       model: openai/gpt-4o
       api_key: os.environ/OPENAI_API_KEY
+      drop_params: true  # Fallback if hook fails
 
   - model_name: gpt-4o-mini
     litellm_params:
       model: openai/gpt-4o-mini
       api_key: os.environ/OPENAI_API_KEY
+      drop_params: true  # Fallback if hook fails
+      litellm_request_debug: true # Debug single request
 
   - model_name: gpt-3.5-turbo
     litellm_params:
       model: openai/gpt-3.5-turbo
       api_key: os.environ/OPENAI_API_KEY
+      drop_params: true  # Fallback if hook fails
 
   # Gemini models
   - model_name: gemini-2.0-flash-exp
     litellm_params:
       model: gemini/gemini-2.0-flash-exp
       api_key: os.environ/GEMINI_API_KEY
+      drop_params: true  # Fallback if hook fails
 
   - model_name: gemini-flash-latest
     litellm_params:
       model: gemini/gemini-flash-latest
       api_key: os.environ/GEMINI_API_KEY
+      drop_params: true  # Fallback if hook fails
 
 litellm_settings:
   callbacks:

@@ -13,6 +13,19 @@ ccproxy:
   hooks:
     - ccproxy.hooks.rule_evaluator # evaluates rules against request
     - ccproxy.hooks.model_router # routes to appropriate model (coupled with rule_evaluator)
+    # CUSTOM HOOK: max_tokens_adjuster
+    # Install first: uv tool install --with /Users/craig/.litellm/ccproxy-custom-hooks --force claude-ccproxy --with 'litellm[proxy]'
+    # See ccproxy-custom-hooks/README.md for details
+    - hook: custom_hooks.max_tokens_adjuster
+      params:
+        safety_margin: 100  # Buffer to avoid edge cases
+        model_limits:  # Override/supplement LiteLLM's built-in limits
+          "gpt-4o": 4096
+          "openai/gpt-4o": 4096
+          "gpt-4o-mini": 16384
+          "openai/gpt-4o-mini": 16384
+          "gemini-2.0-flash-exp": 8192
+          "gemini/gemini-2.0-flash-exp": 8192
     - ccproxy.hooks.capture_headers # captures all HTTP headers with sensitive value redaction
     - ccproxy.hooks.forward_oauth # forwards oauth token to provider (place after routing logic)
 
