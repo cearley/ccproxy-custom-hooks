@@ -18,6 +18,7 @@ Usage:
 """
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -28,6 +29,19 @@ from urllib.request import urlretrieve
 
 GITHUB_REPO = "yourusername/yourrepo"  # Update with your GitHub repo
 GITHUB_BRANCH = "main"
+
+
+def extract_version(templates_dir: Path) -> str:
+    """Extract version from custom_hooks.py."""
+    custom_hooks_file = templates_dir / "ccproxy-custom-hooks" / "custom_hooks.py"
+    if not custom_hooks_file.exists():
+        return "unknown"
+
+    content = custom_hooks_file.read_text()
+    match = re.search(r'^__version__\s*=\s*["\']([^"\']+)["\']', content, re.MULTILINE)
+    if match:
+        return match.group(1)
+    return "unknown"
 
 
 def get_target_dir() -> Path:
@@ -84,7 +98,7 @@ def get_local_templates() -> Path | None:
     return None
 
 
-def install_config_files(templates_dir: Path):
+def install_config_files(templates_dir: Path, version: str):
     """Install configuration files to target directory."""
     target_dir = get_target_dir()
 
@@ -113,6 +127,10 @@ def install_config_files(templates_dir: Path):
             shutil.rmtree(hooks_dst)
         shutil.copytree(hooks_src, hooks_dst)
         print("✓ Copied ccproxy-custom-hooks/")
+
+        version_file = hooks_dst / "VERSION"
+        version_file.write_text(f"{version}\n")
+        print(f"✓ Wrote VERSION file (v{version})")
     else:
         print("⚠ Warning: ccproxy-custom-hooks/ not found in templates")
 
@@ -167,7 +185,8 @@ def main():
             print("\n✗ Installation failed: Could not get templates")
             sys.exit(1)
 
-    install_config_files(templates_dir)
+    version = extract_version(templates_dir)
+    install_config_files(templates_dir, version)
 
     print("\n✨ Installation complete!")
 

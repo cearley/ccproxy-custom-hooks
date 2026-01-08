@@ -3,6 +3,8 @@
 Hooks are loaded by ccproxy when specified in ccproxy.yaml under the 'hooks' section.
 """
 
+__version__ = "0.1.0"
+
 import logging
 from typing import Any
 

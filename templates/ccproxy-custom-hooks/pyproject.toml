@@ -1,11 +1,14 @@
 [project]
 name = "ccproxy-custom-hooks"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Custom hooks for ccproxy"
 requires-python = ">=3.10"
 dependencies = [
     "litellm",
 ]
+
+[tool.setuptools.dynamic]
+version = {attr = "custom_hooks.__version__"}
 
 [build-system]
 requires = ["setuptools>=61.0"]

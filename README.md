@@ -1,14 +1,64 @@
-# CCProxy Configuration
+# CCProxy Custom Hooks Project
 
-LiteLLM proxy with CCProxy hooks for intelligent routing and token management across multiple LLM providers.
+This is a configuration and custom hooks installer for [ccproxy](https://github.com/starbased-co/ccproxy), a [LiteLLM](https://docs.litellm.ai)-based proxy server that enables [Claude Code](https://claude.com/claude-code) to route requests through multiple AI model providers.
 
-## Features
+## Core Purpose
 
-- **Multi-Provider Support**: Claude (via OAuth), OpenAI, and Gemini models through a single endpoint
-- **OAuth Integration**: Use Claude Pro subscription without additional API costs
-- **Smart Token Management**: Automatic max_tokens adjustment for different models
-- **Intelligent Routing**: Dynamic model selection and fallbacks
-- **One-Command Installation**: Complete setup with a single installer script
+The project solves two key problems when using Claude Code with non-Claude models:
+
+1. **Max Tokens Adjustment:** Claude Code sends max_tokens=21333 by default, which exceeds the output limits of many models (e.g., GPT-4o: 4,096 tokens, GPT-4o-mini: 16,384 tokens)
+2. **Tool Filtering:** Claude Code sends ~11.5K tokens of tool definitions, which can exceed the context windows of smaller models like gpt-3.5-turbo (16K tokens total)
+
+## Architecture
+
+### Three-Layer System:
+
+1. **Installer** ([install.py](install.py)): Standalone Python script that:
+  - Installs the [claude-ccproxy](https://github.com/starbased-co/ccproxy) tool with LiteLLM
+  - Deploys configuration files to ~/.ccproxy/
+  - Installs the custom hooks Python package
+2. **Configuration Templates** (in [templates/](templates/)):
+  - [config.yaml](templates/config.yaml): LiteLLM model routing configuration with Claude (OAuth), OpenAI, Gemini, and GitHub Copilot models
+  - [ccproxy.yaml](templates/ccproxy.yaml): Hook pipeline configuration defining how requests are processed
+  - [ccproxy-custom-hooks/](templates/ccproxy-custom-hooks/): Python package with custom hooks
+3. **Custom Hooks** ([custom_hooks.py](templates/ccproxy-custom-hooks/custom_hooks.py)):
+  - **max_tokens_adjuster**: Dynamically adjusts max_tokens based on model capabilities
+  - **tool_filter**: Removes tools for models that can't fit them in their context window
+
+### Key Features
+
+- **One-command installation**: `uv run install.py` handles everything
+- **Multi-provider support**: Claude (OAuth), OpenAI, Gemini, GitHub Copilot
+- **OAuth forwarding**: Uses Claude Code's OAuth tokens for free Claude access
+- **Intelligent routing**: Aliases like `default`, `think`, `background` map to appropriate Claude models
+- **Drop-in replacement**: Set `ANTHROPIC_BASE_URL=http://localhost:4000` and Claude Code routes through the proxy
+
+### Workflow
+
+1. User runs installer → configs deployed to ~/.ccproxy/
+2. User starts CCProxy → LiteLLM proxy runs on localhost:4000
+3. Claude Code makes requests → CCProxy intercepts and processes through hook pipeline:
+  - Rule evaluation
+  - Model routing
+  - Max tokens adjustment (custom)
+  - Tool filtering (custom)
+  - OAuth forwarding
+4. Request forwarded to appropriate provider
+
+### File Structure
+
+```ultree
+/templates/
+  ├── ccproxy.yaml          # Hook pipeline config
+  ├── config.yaml           # Model routing config
+  └── cproxy-custom-hooks/  # Custom hooks package
+      ├── custom_hooks.py   # Hook implementations
+      ├── pyproject.toml    # Package metadata
+      └── README.md         # Hook documentation
+install.py                  # Standalone installer
+```
+
+The project is currently in development with several test scripts and configuration files for testing different scenarios (OAuth, max tokens, etc.).
 
 ## Installation
 
@@ -24,10 +74,9 @@ LiteLLM proxy with CCProxy hooks for intelligent routing and token management ac
 ### Quick Start
 
 The installer handles everything:
-- Installs `claude-ccproxy` tool
-- Deploys configuration files to `~/.ccproxy/`
+- Installs `claude-ccproxy` tool with LiteLLM
+- Deploys configuration files to `~/.ccproxy/` or custom directory
 - Installs custom hooks package
-- Sets up LiteLLM with proxy support
 
 **From GitHub:**
 ```bash
@@ -36,6 +85,8 @@ uv run https://raw.githubusercontent.com/yourusername/yourrepo/main/install.py
 
 **From local directory:**
 ```bash
+git clone https://github.com/yourusername/ccproxy-config-installer.git
+cd ccproxy-config-installer
 uv run install.py
 # Or: python3 install.py
 ```
@@ -67,6 +118,16 @@ ccproxy start --detach  # Start in background
 ccproxy status          # Check status
 ccproxy logs -f         # View logs
 ccproxy stop            # Stop server
+```
+
+### Check Version
+
+```bash
+# Check installed custom hooks version
+cat ~/.ccproxy/ccproxy-custom-hooks/VERSION
+
+# Or check from custom directory
+cat $CCPROXY_CONFIG_DIR/ccproxy-custom-hooks/VERSION
 ```
 
 ## Usage

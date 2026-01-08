@@ -1,11 +1,12 @@
-# CCProxy Configuration Project
+# CCProxy Custom Hooks
 
 ## Architecture
 
-Stand-alone CCProxy with LiteLLM model routing and OAuth hooks:
-- Running on localhost:4000
-- Configuration managed via install.py
-- Custom hooks for max_tokens adjustment
+[CCProxy](https://github.com/starbased-co/ccproxy) ([LiteLLM](https://docs.litellm.ai)-based proxy for [Claude Code](https://claude.com/claude-code)) custom hooks installer.
+
+Includes ccproxy.yaml and config.yaml (litellm) configurations and custom hooks for:
+- max tokens adjustment based on model context window
+- tool filtering based on model capabilities
 
 ## Installation
 
@@ -23,10 +24,9 @@ CCPROXY_CONFIG_DIR=/custom/path uv run install.py
 ```
 
 The installer automatically:
-- Installs claude-ccproxy tool
-- Deploys configuration files to ~/.ccproxy/
+- Installs claude-ccproxy tool with LiteLLM
+- Deploys configuration files to ~/.ccproxy/ or custom directory
 - Installs custom hooks package
-- Sets up LiteLLM with proxy support
 
 ## Key Files
 
@@ -49,6 +49,9 @@ ccproxy logs [-f]
 
 # Stop the proxy server
 ccproxy stop
+
+# Check installed custom hooks version
+cat ~/.ccproxy/ccproxy-custom-hooks/VERSION
 ```
 
 ## Usage with Claude Code
