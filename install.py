@@ -84,10 +84,12 @@ def download_from_github():
             print(f"✗ Templates directory not found at {templates_dir}")
             return None
 
-        temp_templates = Path(tmpdir) / "templates_copy"
-        shutil.copytree(templates_dir, temp_templates)
+        # Copy templates to a persistent temp location before tmpdir is cleaned up
+        import tempfile as tf
+        persistent_temp = Path(tf.mkdtemp(prefix="ccproxy_templates_"))
+        shutil.copytree(templates_dir, persistent_temp / "templates")
 
-        return temp_templates
+        return persistent_temp / "templates"
 
 
 def get_local_templates() -> Path | None:
@@ -176,19 +178,25 @@ def main():
     print("🚀 CCProxy Configuration Installer\n")
 
     templates_dir = get_local_templates()
+    cleanup_needed = False
 
     if templates_dir:
         print("📁 Using local templates")
     else:
         templates_dir = download_from_github()
+        cleanup_needed = True
         if not templates_dir:
             print("\n✗ Installation failed: Could not get templates")
             sys.exit(1)
 
-    version = extract_version(templates_dir)
-    install_config_files(templates_dir, version)
-
-    print("\n✨ Installation complete!")
+    try:
+        version = extract_version(templates_dir)
+        install_config_files(templates_dir, version)
+        print("\n✨ Installation complete!")
+    finally:
+        # Clean up downloaded templates
+        if cleanup_needed and templates_dir and templates_dir.exists():
+            shutil.rmtree(templates_dir.parent)
 
 
 if __name__ == "__main__":

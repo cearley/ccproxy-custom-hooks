@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fixed installer bug where downloaded templates were deleted before installation, causing "not found in templates" warnings
+
 ## [0.1.0] - 2026-01-08
 
 ### Added
