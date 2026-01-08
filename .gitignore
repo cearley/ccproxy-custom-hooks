@@ -55,15 +55,6 @@ config.moved.yaml
 *.tmp
 *.tar
 
-# Development/testing files (not for public repo)
-DATABASE_PLAN.md
-test_*.sh
-docker-compose.yml
-prometheus.yml
-
-# Database files
-postgres_data/
-
 # Logs
 *.log
 logs/
@@ -78,3 +69,4 @@ logs/
 # Windows
 Thumbs.db
 desktop.ini
+.env.example
