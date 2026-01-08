@@ -26,6 +26,13 @@ ccproxy:
           "openai/gpt-4o-mini": 16384
           "gemini-2.0-flash-exp": 8192
           "gemini/gemini-2.0-flash-exp": 8192
+    # CUSTOM HOOK: tool_filter
+    # Removes tools for models with small context windows that cannot fit Claude Code's tool definitions
+    - hook: custom_hooks.tool_filter
+      params:
+        models_without_tools:
+          - "openai/gpt-3.5-turbo"
+          - "gpt-3.5-turbo"
     - ccproxy.hooks.capture_headers # captures all HTTP headers with sensitive value redaction
     - ccproxy.hooks.forward_oauth # forwards oauth token to provider (place after routing logic)
 

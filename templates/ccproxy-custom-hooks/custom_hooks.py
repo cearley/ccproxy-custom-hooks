@@ -92,3 +92,58 @@ def max_tokens_adjuster(
         )
 
     return data
+
+
+def tool_filter(
+    data: dict[str, Any], user_api_key_dict: dict[str, Any], **kwargs: Any
+) -> dict[str, Any]:
+    """Filter or remove tools for models with small context windows.
+
+    Claude Code sends extensive tool definitions (~11,585 tokens) which exceed
+    the context window limits of some models like gpt-3.5-turbo (16,385 tokens).
+
+    This hook removes tools for specified models, allowing them to work but
+    only with text generation (no tool-calling capabilities).
+
+    Args:
+        data: Request data from LiteLLM
+        user_api_key_dict: User API key dictionary
+        **kwargs: Additional keyword arguments including:
+            - models_without_tools: List of models that should have tools removed
+
+    Returns:
+        Modified request data with tools removed for specified models
+
+    Example configuration in ccproxy.yaml:
+        hooks:
+          - hook: custom_hooks.tool_filter
+            params:
+              models_without_tools:
+                - "openai/gpt-3.5-turbo"
+                - "gpt-3.5-turbo"
+    """
+    models_without_tools = kwargs.get("models_without_tools", [])
+
+    metadata = data.get("metadata", {})
+    routed_model = metadata.get("ccproxy_litellm_model")
+
+    if not routed_model:
+        return data
+
+    if routed_model in models_without_tools:
+        original_tools_count = len(data.get("tools", []))
+
+        if original_tools_count > 0:
+            data.pop("tools", None)
+            data.pop("tool_choice", None)
+
+            logger.info(
+                f"Removed {original_tools_count} tools for model {routed_model}",
+                extra={
+                    "event": "tool_filtering",
+                    "model": routed_model,
+                    "tools_removed": original_tools_count,
+                },
+            )
+
+    return data

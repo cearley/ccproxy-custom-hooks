@@ -49,6 +49,9 @@ model_list:
       drop_params: true  # Fallback if hook fails
       litellm_request_debug: true # Debug single request
 
+  # Note: gpt-3.5-turbo has tools removed via tool_filter hook due to small context window (16K tokens).
+  # Claude Code's tool definitions (~11.5K tokens) would exceed the limit with messages + completion.
+  # The model will only generate text responses, which is fine for simple questions.
   - model_name: gpt-3.5-turbo
     litellm_params:
       model: openai/gpt-3.5-turbo
