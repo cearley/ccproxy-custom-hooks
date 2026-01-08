@@ -123,3 +123,97 @@ The version automatically propagates to:
 - `pyproject.toml` (via dynamic versioning)
 - `install.py` (extracted at runtime)
 - `~/.ccproxy/ccproxy-custom-hooks/VERSION` file (written during installation)
+
+## Release Process
+
+Follow these steps to create a new release:
+
+### 1. Update Version
+
+Edit the version in `templates/ccproxy-custom-hooks/custom_hooks.py`:
+
+```python
+__version__ = "0.2.0"  # Bump to new version
+```
+
+The version automatically propagates to:
+- `pyproject.toml` (via dynamic versioning)
+- `install.py` (extracted at runtime)
+- `~/.ccproxy/ccproxy-custom-hooks/VERSION` file (written during installation)
+
+### 2. Update CHANGELOG.md
+
+Move unreleased changes to a new version section:
+
+```markdown
+## [0.2.0] - 2026-01-XX
+
+### Added
+- New feature description
+
+### Changed
+- Changed behavior description
+
+### Fixed
+- Bug fix description
+```
+
+Update the comparison links at the bottom:
+
+```markdown
+[Unreleased]: https://github.com/cearley/ccproxy-custom-hooks/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/cearley/ccproxy-custom-hooks/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/cearley/ccproxy-custom-hooks/releases/tag/v0.1.0
+```
+
+### 3. Run Tests
+
+Ensure code quality and test installation:
+
+```bash
+make format
+make lint
+make test
+```
+
+### 4. Commit Changes
+
+```bash
+git add templates/ccproxy-custom-hooks/custom_hooks.py CHANGELOG.md
+git commit -m "Bump version to 0.2.0"
+```
+
+### 5. Create and Push Tags
+
+**Option A: Interactive (recommended for first time):**
+```bash
+make release VERSION=0.2.0
+# Follow prompts, then manually push
+```
+
+**Option B: Automated:**
+```bash
+make tag-release VERSION=0.2.0
+# Creates tags and pushes automatically
+```
+
+### 6. Create GitHub Release
+
+1. Go to https://github.com/cearley/ccproxy-custom-hooks/releases/new
+2. Select tag: `v0.2.0`
+3. Title: `v0.2.0`
+4. Copy relevant section from CHANGELOG.md into description
+5. Publish release
+
+### Version Tag Strategy
+
+- **Version tags** (v0.1.0, v0.2.0): Permanent, never moved
+- **Latest tag**: Moving pointer, force-updated with each release
+- Users wanting stability: pin to version tags
+- Users wanting latest: use `latest` tag
+
+### Semantic Versioning Guidelines
+
+- **Major (x.0.0)**: Breaking changes to hook APIs or configuration format
+- **Minor (0.x.0)**: New features, new hooks, backward-compatible changes
+- **Patch (0.0.x)**: Bug fixes, documentation updates, minor improvements

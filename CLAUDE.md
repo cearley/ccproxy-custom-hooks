@@ -80,3 +80,47 @@ python3 install.py
 # Restart ccproxy
 ccproxy restart
 ```
+
+## Release Management
+
+### Creating a New Release
+
+The project uses semantic versioning with git tags for releases.
+
+**Quick Release:**
+```bash
+# 1. Update version and CHANGELOG
+vim templates/ccproxy-custom-hooks/custom_hooks.py  # Bump __version__
+vim CHANGELOG.md  # Add release notes
+
+# 2. Test and commit
+make check
+git commit -am "Bump version to 0.2.0"
+
+# 3. Create and push tags
+make tag-release VERSION=0.2.0
+
+# 4. Create GitHub release (copy CHANGELOG section)
+# Visit: https://github.com/cearley/ccproxy-custom-hooks/releases/new
+```
+
+**Detailed process documented in DEVELOPMENT.md**
+
+### Version Strategy
+
+- **Version source**: `templates/ccproxy-custom-hooks/custom_hooks.py` (`__version__` variable)
+- **Git tags**: `v0.1.0`, `v0.2.0`, etc. (permanent)
+- **Latest tag**: Moving pointer to most recent release
+- **CHANGELOG**: Maintained in `CHANGELOG.md` following keepachangelog.com format
+
+### Installation from Releases
+
+**Latest release:**
+```bash
+uv run https://raw.githubusercontent.com/cearley/ccproxy-custom-hooks/latest/install.py
+```
+
+**Specific version:**
+```bash
+uv run https://raw.githubusercontent.com/cearley/ccproxy-custom-hooks/v0.1.0/install.py
+```

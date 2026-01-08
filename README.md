@@ -78,9 +78,14 @@ The installer handles everything:
 - Deploys configuration files to `~/.ccproxy/` or custom directory
 - Installs custom hooks package
 
-**From GitHub:**
+**From GitHub (latest release):**
 ```bash
-uv run https://raw.githubusercontent.com/cearley/ccproxy-custom-hooks/main/install.py
+uv run https://raw.githubusercontent.com/cearley/ccproxy-custom-hooks/latest/install.py
+```
+
+**From GitHub (specific version):**
+```bash
+uv run https://raw.githubusercontent.com/cearley/ccproxy-custom-hooks/v0.1.0/install.py
 ```
 
 **From local directory:**
