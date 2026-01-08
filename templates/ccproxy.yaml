@@ -24,8 +24,8 @@ ccproxy:
           "openai/gpt-4o": 4096
           "gpt-4o-mini": 16384
           "openai/gpt-4o-mini": 16384
-          "gemini-2.0-flash-exp": 8192
-          "gemini/gemini-2.0-flash-exp": 8192
+          "gemini-2.5-flash": 8192
+          "gemini/gemini-2.5-flash": 8192
     # CUSTOM HOOK: tool_filter
     # Removes tools for models with small context windows that cannot fit Claude Code's tool definitions
     - hook: custom_hooks.tool_filter

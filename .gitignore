@@ -53,6 +53,13 @@ config.moved.yaml
 *.bak
 *.backup
 *.tmp
+*.tar
+
+# Development/testing files (not for public repo)
+DATABASE_PLAN.md
+test_*.sh
+docker-compose.yml
+prometheus.yml
 
 # Database files
 postgres_data/

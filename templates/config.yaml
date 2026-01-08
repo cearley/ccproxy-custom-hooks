@@ -59,17 +59,35 @@ model_list:
       drop_params: true  # Fallback if hook fails
 
   # Gemini models
-  - model_name: gemini-2.0-flash-exp
+  - model_name: gemini-2.5-flash
     litellm_params:
-      model: gemini/gemini-2.0-flash-exp
+      model: gemini/gemini-2.5-flash
       api_key: os.environ/GEMINI_API_KEY
       drop_params: true  # Fallback if hook fails
+      litellm_request_debug: true # Debug single request
 
   - model_name: gemini-flash-latest
     litellm_params:
       model: gemini/gemini-flash-latest
       api_key: os.environ/GEMINI_API_KEY
       drop_params: true  # Fallback if hook fails
+
+  # GitHub Copilot models
+  - model_name: gpt-4
+    litellm_params:
+      model: github_copilot/gpt-4
+  
+  - model_name: gpt-5.1-codex
+    model_info:
+      mode: responses
+    litellm_params:
+      model: github_copilot/gpt-5.1-codex
+  
+  - model_name: text-embedding-ada-002
+    model_info:
+      mode: embedding
+    litellm_params:
+      model: github_copilot/text-embedding-ada-002
 
 litellm_settings:
   callbacks:

@@ -8,7 +8,7 @@ Standalone installer for CCProxy configuration.
 
 Usage:
     # From GitHub (one command!)
-    uv run https://raw.githubusercontent.com/yourusername/yourrepo/main/install.py
+    uv run https://raw.githubusercontent.com/cearley/ccproxy-custom-hooks/main/install.py
 
     # From local directory
     uv run install.py
@@ -27,7 +27,7 @@ import zipfile
 from pathlib import Path
 from urllib.request import urlretrieve
 
-GITHUB_REPO = "yourusername/yourrepo"  # Update with your GitHub repo
+GITHUB_REPO = "cearley/ccproxy-custom-hooks"
 GITHUB_BRANCH = "main"
 
 

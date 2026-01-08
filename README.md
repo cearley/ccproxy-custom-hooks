@@ -80,13 +80,13 @@ The installer handles everything:
 
 **From GitHub:**
 ```bash
-uv run https://raw.githubusercontent.com/yourusername/yourrepo/main/install.py
+uv run https://raw.githubusercontent.com/cearley/ccproxy-custom-hooks/main/install.py
 ```
 
 **From local directory:**
 ```bash
-git clone https://github.com/yourusername/ccproxy-config-installer.git
-cd ccproxy-config-installer
+git clone https://github.com/cearley/ccproxy-custom-hooks.git
+cd ccproxy-custom-hooks
 uv run install.py
 # Or: python3 install.py
 ```
