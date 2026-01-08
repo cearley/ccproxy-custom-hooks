@@ -86,6 +86,7 @@ def download_from_github():
 
         # Copy templates to a persistent temp location before tmpdir is cleaned up
         import tempfile as tf
+
         persistent_temp = Path(tf.mkdtemp(prefix="ccproxy_templates_"))
         shutil.copytree(templates_dir, persistent_temp / "templates")
 
