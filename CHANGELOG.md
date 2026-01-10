@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- First install: Creates config.yaml and ccproxy.yaml from .example templates
+- Upgrades: Updates .example files, preserves your existing configs
+
 ## [0.1.1] - 2026-01-08
 
 ### Fixed
