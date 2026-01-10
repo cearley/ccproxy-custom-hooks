@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-01-09
+
 ### Changed
 - First install: Creates config.yaml and ccproxy.yaml from .example templates
 - Upgrades: Updates .example files, preserves your existing configs
@@ -29,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive documentation and development guides
 - Pre-commit hooks with Ruff for code quality
 
-[Unreleased]: https://github.com/cearley/ccproxy-custom-hooks/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/cearley/ccproxy-custom-hooks/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/cearley/ccproxy-custom-hooks/releases/tag/v0.1.1
 [0.1.1]: https://github.com/cearley/ccproxy-custom-hooks/releases/tag/v0.1.1
 [0.1.0]: https://github.com/cearley/ccproxy-custom-hooks/releases/tag/v0.1.0
