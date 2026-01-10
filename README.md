@@ -17,11 +17,11 @@ The project solves two key problems when using Claude Code with non-Claude model
   - Installs the [claude-ccproxy](https://github.com/starbased-co/ccproxy) tool with LiteLLM
   - Deploys configuration files to ~/.ccproxy/
   - Installs the custom hooks Python package
-2. **Configuration Templates** (in [templates/](templates/)):
-  - [config.yaml](templates/config.yaml): LiteLLM model routing configuration with Claude (OAuth), OpenAI, Gemini, and GitHub Copilot models
-  - [ccproxy.yaml](templates/ccproxy.yaml): Hook pipeline configuration defining how requests are processed
-  - [ccproxy-custom-hooks/](templates/ccproxy-custom-hooks/): Python package with custom hooks
-3. **Custom Hooks** ([custom_hooks.py](templates/ccproxy-custom-hooks/custom_hooks.py)):
+2. **Configuration Templates**:
+  - [config.example.yaml](config.example.yaml): LiteLLM model routing configuration with Claude (OAuth), OpenAI, Gemini, and GitHub Copilot models
+  - [ccproxy.example.yaml](ccproxy.example.yaml): Hook pipeline configuration defining how requests are processed
+  - [ccproxy-custom-hooks/](ccproxy-custom-hooks/): Python package with custom hooks
+3. **Custom Hooks** ([custom_hooks.py](ccproxy-custom-hooks/custom_hooks.py)):
   - **max_tokens_adjuster**: Dynamically adjusts max_tokens based on model capabilities
   - **tool_filter**: Removes tools for models that can't fit them in their context window
 
@@ -47,15 +47,15 @@ The project solves two key problems when using Claude Code with non-Claude model
 
 ### File Structure
 
-```ultree
-/templates/
-  ├── ccproxy.yaml          # Hook pipeline config
-  ├── config.yaml           # Model routing config
-  └── cproxy-custom-hooks/  # Custom hooks package
-      ├── custom_hooks.py   # Hook implementations
-      ├── pyproject.toml    # Package metadata
-      └── README.md         # Hook documentation
-install.py                  # Standalone installer
+```
+ccproxy-custom-hooks/
+├── ccproxy.example.yaml    # Hook pipeline config template
+├── config.example.yaml     # Model routing config template
+├── ccproxy-custom-hooks/   # Custom hooks package
+│   ├── custom_hooks.py     # Hook implementations
+│   ├── pyproject.toml      # Package metadata
+│   └── README.md           # Hook documentation
+└── install.py              # Standalone installer
 ```
 
 The project is currently in development with several test scripts and configuration files for testing different scenarios (OAuth, max tokens, etc.).
@@ -75,7 +75,8 @@ The project is currently in development with several test scripts and configurat
 
 The installer handles everything:
 - Installs `claude-ccproxy` tool with LiteLLM
-- Deploys configuration files to `~/.ccproxy/` or custom directory
+- Deploys `.example` configuration files to `~/.ccproxy/` or custom directory
+- Creates initial configs from examples (first install only)
 - Installs custom hooks package
 
 **From GitHub (latest release):**
@@ -101,20 +102,44 @@ uv run install.py
 CCPROXY_CONFIG_DIR=/custom/path uv run install.py
 ```
 
-*Development Note:* The installer is idempotent - safe to run multiple times:
+## Upgrading
 
-**From local directory:**
+To upgrade to a new version:
+
 ```bash
-# Edit files in templates/
-# Re-run installer
+# Re-run the installer
 uv run install.py
-# Or: python3 install.py
+
+# Review changes in .example files
+diff ~/.ccproxy/config.yaml ~/.ccproxy/config.example.yaml
+diff ~/.ccproxy/ccproxy.yaml ~/.ccproxy/ccproxy.example.yaml
+
+# Merge any new settings into your configs
+# Edit your config.yaml and ccproxy.yaml as needed
 
 # Restart ccproxy
 ccproxy restart
 ```
 
-**Note:** Re-running overwrites deployed files in `~/.ccproxy/`. Edit templates, not deployed files.
+**Upgrade behavior:**
+- `.example` files are always updated to the latest version
+- Your actual `config.yaml` and `ccproxy.yaml` are preserved
+- Custom hooks package is always updated (code, not config)
+- Compare `.example` files with your configs to see what changed
+
+## Configuration Updates
+
+To modify your configuration:
+
+1. Edit `~/.ccproxy/config.yaml` or `~/.ccproxy/ccproxy.yaml` directly
+2. Restart ccproxy: `ccproxy restart`
+
+**Note:** `.example` files are templates - edit the actual config files, not the examples.
+
+To see what changed in a new release:
+```bash
+diff ~/.ccproxy/config.yaml ~/.ccproxy/config.example.yaml
+```
 
 ### Start CCProxy
 

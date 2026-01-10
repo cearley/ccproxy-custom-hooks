@@ -14,7 +14,7 @@ ccproxy:
     - ccproxy.hooks.rule_evaluator # evaluates rules against request
     - ccproxy.hooks.model_router # routes to appropriate model (coupled with rule_evaluator)
     # CUSTOM HOOK: max_tokens_adjuster
-    # Install first: uv tool install --with /Users/craig/.litellm/ccproxy-custom-hooks --force claude-ccproxy --with 'litellm[proxy]'
+    # Installed automatically by install.py
     # See ccproxy-custom-hooks/README.md for details
     - hook: custom_hooks.max_tokens_adjuster
       params:

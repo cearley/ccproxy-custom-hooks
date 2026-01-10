@@ -6,6 +6,11 @@
 """
 Standalone installer for CCProxy configuration.
 
+Behavior:
+    - First install: Creates config.yaml and ccproxy.yaml from .example templates
+    - Upgrades: Updates .example files, preserves your existing configs
+    - Custom hooks: Always updated to latest version
+
 Usage:
     # From GitHub (one command!)
     uv run https://raw.githubusercontent.com/cearley/ccproxy-custom-hooks/main/install.py
@@ -15,6 +20,9 @@ Usage:
 
     # Custom installation directory
     CCPROXY_CONFIG_DIR=/custom/path uv run install.py
+
+    # After upgrade, compare configs to see what changed:
+    diff ~/.ccproxy/config.yaml ~/.ccproxy/config.example.yaml
 """
 
 import os
@@ -31,9 +39,9 @@ GITHUB_REPO = "cearley/ccproxy-custom-hooks"
 GITHUB_BRANCH = "main"
 
 
-def extract_version(templates_dir: Path) -> str:
+def extract_version(source_dir: Path) -> str:
     """Extract version from custom_hooks.py."""
-    custom_hooks_file = templates_dir / "ccproxy-custom-hooks" / "custom_hooks.py"
+    custom_hooks_file = source_dir / "ccproxy-custom-hooks" / "custom_hooks.py"
     if not custom_hooks_file.exists():
         return "unknown"
 
@@ -53,8 +61,8 @@ def get_target_dir() -> Path:
 
 
 def download_from_github():
-    """Download repository as ZIP from GitHub and extract templates."""
-    print("📦 Downloading templates from GitHub...")
+    """Download repository as ZIP from GitHub and extract source files."""
+    print("📦 Downloading from GitHub...")
 
     zip_url = f"https://github.com/{GITHUB_REPO}/archive/refs/heads/{GITHUB_BRANCH}.zip"
 
@@ -71,37 +79,38 @@ def download_from_github():
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(tmpdir)
 
-        # After extracting, the structure is: repo-branch/templates/
+        # After extracting, the structure is: repo-branch/
         extracted_dirs = list(Path(tmpdir).iterdir())
         if not extracted_dirs:
             print("✗ No files found in downloaded archive")
             return None
 
         repo_dir = [d for d in extracted_dirs if d.is_dir()][0]
-        templates_dir = repo_dir / "templates"
 
-        if not templates_dir.exists():
-            print(f"✗ Templates directory not found at {templates_dir}")
+        # Verify essential files exist
+        if not (repo_dir / "ccproxy-custom-hooks").exists():
+            print(f"✗ Source files not found in {repo_dir}")
             return None
 
-        # Copy templates to a persistent temp location before tmpdir is cleaned up
+        # Copy repo to a persistent temp location before tmpdir is cleaned up
         import tempfile as tf
 
-        persistent_temp = Path(tf.mkdtemp(prefix="ccproxy_templates_"))
-        shutil.copytree(templates_dir, persistent_temp / "templates")
+        persistent_temp = Path(tf.mkdtemp(prefix="ccproxy_source_"))
+        shutil.copytree(repo_dir, persistent_temp / "source")
 
-        return persistent_temp / "templates"
+        return persistent_temp / "source"
 
 
-def get_local_templates() -> Path | None:
-    """Get templates from local directory if running locally."""
-    local_templates = Path(__file__).parent / "templates"
-    if local_templates.exists():
-        return local_templates
+def get_local_source() -> Path | None:
+    """Get source files from local directory if running locally."""
+    local_source = Path(__file__).parent
+    # Verify essential files exist
+    if (local_source / "ccproxy-custom-hooks").exists():
+        return local_source
     return None
 
 
-def install_config_files(templates_dir: Path, version: str):
+def install_config_files(source_dir: Path, version: str):
     """Install configuration files to target directory."""
     target_dir = get_target_dir()
 
@@ -112,24 +121,36 @@ def install_config_files(templates_dir: Path, version: str):
     target_dir.mkdir(parents=True, exist_ok=True)
     print(f"✓ Created {target_dir}")
 
-    for filename in ["config.yaml", "ccproxy.yaml"]:
-        src = templates_dir / filename
-        dst = target_dir / filename
-        if src.exists():
-            if dst.exists() or dst.is_symlink():
-                dst.unlink()
-            shutil.copy2(src, dst)
-            print(f"✓ Copied {filename}")
-        else:
-            print(f"⚠ Warning: {filename} not found in templates")
+    for base_filename in ["config.yaml", "ccproxy.yaml"]:
+        example_filename = base_filename.replace(".yaml", ".example.yaml")
+        src = source_dir / example_filename
+        example_dst = target_dir / example_filename
+        actual_dst = target_dir / base_filename
 
-    hooks_src = templates_dir / "ccproxy-custom-hooks"
+        if not src.exists():
+            print(f"⚠ Warning: {example_filename} not found in source")
+            continue
+
+        # Always update .example file (remove existing first)
+        if example_dst.exists() or example_dst.is_symlink():
+            example_dst.unlink()
+        shutil.copy2(src, example_dst)
+        print(f"✓ Updated {example_filename}")
+
+        # Only create actual config if it doesn't exist (first install)
+        if not actual_dst.exists():
+            shutil.copy2(src, actual_dst)
+            print(f"✓ Created {base_filename} from example")
+        else:
+            print(f"✓ Preserved existing {base_filename} (compare with {example_filename})")
+
+    hooks_src = source_dir / "ccproxy-custom-hooks"
     hooks_dst = target_dir / "ccproxy-custom-hooks"
     if hooks_src.exists():
         if hooks_dst.exists():
             shutil.rmtree(hooks_dst)
         shutil.copytree(hooks_src, hooks_dst)
-        print("✓ Copied ccproxy-custom-hooks/")
+        print("✓ Updated ccproxy-custom-hooks/")
 
         version_file = hooks_dst / "VERSION"
         version_file.write_text(f"{version}\n")
@@ -178,26 +199,26 @@ def main():
     """Main entry point."""
     print("🚀 CCProxy Configuration Installer\n")
 
-    templates_dir = get_local_templates()
+    source_dir = get_local_source()
     cleanup_needed = False
 
-    if templates_dir:
-        print("📁 Using local templates")
+    if source_dir:
+        print("📁 Using local source files")
     else:
-        templates_dir = download_from_github()
+        source_dir = download_from_github()
         cleanup_needed = True
-        if not templates_dir:
-            print("\n✗ Installation failed: Could not get templates")
+        if not source_dir:
+            print("\n✗ Installation failed: Could not get source files")
             sys.exit(1)
 
     try:
-        version = extract_version(templates_dir)
-        install_config_files(templates_dir, version)
+        version = extract_version(source_dir)
+        install_config_files(source_dir, version)
         print("\n✨ Installation complete!")
     finally:
-        # Clean up downloaded templates
-        if cleanup_needed and templates_dir and templates_dir.exists():
-            shutil.rmtree(templates_dir.parent)
+        # Clean up downloaded source files
+        if cleanup_needed and source_dir and source_dir.exists():
+            shutil.rmtree(source_dir.parent)
 
 
 if __name__ == "__main__":

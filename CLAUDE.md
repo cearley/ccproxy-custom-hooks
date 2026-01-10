@@ -30,10 +30,17 @@ The installer automatically:
 
 ## Key Files
 
-Configuration files in `~/.ccproxy/` (or custom directory):
-- `config.yaml` - LiteLLM model routing configuration
-- `ccproxy.yaml` - Hook configurations (rule_evaluator, model_router, forward_oauth, max_tokens_adjuster)
+Template files in repository:
+- `config.example.yaml` - LiteLLM model routing configuration template
+- `ccproxy.example.yaml` - Hook configurations template
 - `ccproxy-custom-hooks/` - Custom hooks Python package
+
+Deployed files in `~/.ccproxy/` (or custom directory):
+- `config.yaml` - Your active LiteLLM configuration (preserved on upgrade)
+- `ccproxy.yaml` - Your active hook configuration (preserved on upgrade)
+- `config.example.yaml` - Latest template reference (updated on upgrade)
+- `ccproxy.example.yaml` - Latest template reference (updated on upgrade)
+- `ccproxy-custom-hooks/` - Custom hooks Python package (replaced on upgrade)
 
 ## CCProxy Commands
 
@@ -71,15 +78,27 @@ ccproxy run claude --model <model-name> -p "Your prompt"
 
 ## Configuration Updates
 
-After editing template files:
+To modify your configuration:
+
+1. Edit `~/.ccproxy/config.yaml` or `~/.ccproxy/ccproxy.yaml` directly
+2. Restart ccproxy: `ccproxy restart`
+
+**Upgrading to a new version:**
 
 ```bash
-# Re-run installer to update deployed files
+# Re-run installer (preserves your configs)
 python3 install.py
+
+# Compare changes
+diff ~/.ccproxy/config.yaml ~/.ccproxy/config.example.yaml
+
+# Merge any new settings as needed
 
 # Restart ccproxy
 ccproxy restart
 ```
+
+**Note:** `.example` files are templates - edit the actual config files, not the examples.
 
 ## Release Management
 
@@ -90,7 +109,7 @@ The project uses semantic versioning with git tags for releases.
 **Quick Release:**
 ```bash
 # 1. Update version and CHANGELOG
-vim templates/ccproxy-custom-hooks/custom_hooks.py  # Bump __version__
+vim ccproxy-custom-hooks/custom_hooks.py  # Bump __version__
 vim CHANGELOG.md  # Add release notes
 
 # 2. Test and commit
@@ -108,7 +127,7 @@ make tag-release VERSION=0.2.0
 
 ### Version Strategy
 
-- **Version source**: `templates/ccproxy-custom-hooks/custom_hooks.py` (`__version__` variable)
+- **Version source**: `ccproxy-custom-hooks/custom_hooks.py` (`__version__` variable)
 - **Git tags**: `v0.1.0`, `v0.2.0`, etc. (permanent)
 - **Latest tag**: Moving pointer to most recent release
 - **CHANGELOG**: Maintained in `CHANGELOG.md` following keepachangelog.com format
